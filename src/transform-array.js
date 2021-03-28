@@ -1,31 +1,41 @@
 const CustomError = require("../extensions/custom-error");
 
-module.exports = function transform(array) {
-    if (Array.isArray(array)) {
-    let newArray = [].concat(array);
-
-    let answer = newArray.map((item, index, array) => {
-        if (typeof item === 'string') {
-        if (item === '--double-next') {
-            array[index + 1] !== undefined ? item = array[index + 1] : item = '';
-        } else if (item === '--double-prev') {
-            array[index - 1] !== undefined ? item = array[index - 1] : item = '';
-        } else if (item === '--discard-next') {
-            array[index + 1] !== undefined ? (item = '', array[index + 1] = '') : item = '';
-        } else if (item === '--discard-prev') {
-            array[index - 1] !== undefined ? (item = 'del-prev') : item = '';
-        }
-    } return item;
-    });
-
-    for (let i = 0; i < answer.length; i++) {
-        let indexDel = answer.indexOf('del-prev') - 1;
-        indexDel > 0 ? answer.splice(indexDel, 2) : answer;
+module.exports = function transform(arr) {
+    if (!Array.isArray(arr)) {
+    throw new Error("Error");
     }
 
-    return answer.filter((item) => item !== '');
+    let newArr = [];
+    let flag = false;
+
+    for (let i = 0; i < arr.length; i++) {
+    switch (arr[i]) {
+        case "--discard-next":
+        if (i !== arr.length - 1) {
+            i++;
+            flag = true;
+        }
+        break;
+        case "--discard-prev":
+        if (i !== 0 && !flag) {
+            newArr.pop();
+        }
+        break;
+        case "--double-next":
+        if (i !== arr.length - 1) {
+            newArr.push(arr[i + 1]);
+        }
+        break;
+        case "--double-prev":
+        if (i !== 0 && !flag) {
+            newArr.push(arr[i - 1]);
+        }
+        break;
+        default:
+        newArr.push(arr[i]);
+        flag = false;
+    }
 }
 
-throw Error("Error")
-
-}
+    return newArr;
+};
